@@ -29,7 +29,7 @@ Luna Emotion Companion is an AI-powered Emotion Intelligence Platform that analy
 | **Essanth Sarvajith** | AI Lead & Team Leader | Project Architecture, AI Development, Integration, Git Management |
 | **Divya Bharathi**    | Frontend Lead         | UI/UX Development, Dashboard, Luna Interface, Reports             |
 | **Dhivya Dharshini**  | Backend Lead          | FastAPI Development, Database, Authentication, REST APIs          |
-| **Dhilliharini**      | Communication Lead    | WebRTC, WebSockets, Live Communication, Notifications             |
+| **Dilliharini**      | Communication Lead    | WebRTC, WebSockets, Live Communication, Notifications             |
 ---
 
 # Technology Stack
