@@ -1,98 +1,169 @@
-"use client"
+'use client';
 
-import { useState } from "react"
-import Link from "next/link"
-import { Menu, X, LogIn } from "lucide-react"
-import { motion, AnimatePresence } from "framer-motion"
-import { buttonVariants } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { Menu, X, Moon, Sun } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Button } from '@/components/ui/button';
 
-export default function Navbar() {
-  const [open, setOpen] = useState(false)
+const Navbar = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+
+    const checkTheme = () => {
+      setIsDark(document.documentElement.classList.contains('dark'));
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    checkTheme();
+
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const toggleTheme = () => {
+    setIsDark(!isDark);
+    document.documentElement.classList.toggle('dark');
+  };
+
+  const navLinks = [
+    { name: 'Features', href: '#features' },
+    { name: 'About', href: '#about' },
+    { name: 'Pricing', href: '#pricing' },
+    { name: 'Contact', href: '#contact' },
+  ];
 
   return (
-    <header className="sticky top-0 z-50">
-      <nav className="glass container-custom flex items-center justify-between gap-4 py-3">
-        <div className="flex items-center gap-4">
-          <Link href="/" className="text-lg font-semibold">
-            Luna Emotion Companion
+    <motion.nav
+      initial={{ y: -100 }}
+      animate={{ y: 0 }}
+      transition={{ duration: 0.5 }}
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        isScrolled
+          ? 'glass shadow-lg'
+          : 'bg-transparent'
+      }`}
+    >
+      <div className="container-custom">
+        <div className="flex items-center justify-between h-16 md:h-20">
+          {/* Logo */}
+          <Link href="/" className="flex items-center space-x-2">
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center"
+            >
+              <span className="text-white font-bold text-xl">L</span>
+            </motion.div>
+            <span className="text-xl font-bold text-gradient">Luna</span>
           </Link>
+
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center space-x-8">
+            {navLinks.map((link) => (
+              <Link
+                key={link.name}
+                href={link.href}
+                className="text-foreground/80 hover:text-foreground transition-colors font-medium"
+              >
+                {link.name}
+              </Link>
+            ))}
+          </div>
+
+          {/* Desktop Auth Buttons */}
+          <div className="hidden md:flex items-center space-x-4">
+            <Button
+              variant="ghost"
+              asChild
+              className="text-foreground/80 hover:text-foreground"
+            >
+              <Link href="/login">Login</Link>
+            </Button>
+            <Button
+              asChild
+              className="bg-gradient-to-r from-primary to-accent hover:opacity-90"
+            >
+              <Link href="/register">Get Started</Link>
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleTheme}
+              className="ml-2"
+            >
+              {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+            </Button>
+          </div>
+
+          {/* Mobile Menu Button */}
+          <div className="md:hidden flex items-center space-x-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleTheme}
+            >
+              {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsOpen(!isOpen)}
+            >
+              {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            </Button>
+          </div>
         </div>
 
-        <ul className="hidden md:flex items-center gap-6 text-sm">
-          <li>
-            <a href="#" className="hover:underline">
-              Home
-            </a>
-          </li>
-          <li>
-            <a href="#features" className="hover:underline">
-              Features
-            </a>
-          </li>
-          <li>
-            <a href="#about" className="hover:underline">
-              About
-            </a>
-          </li>
-          <li>
-            <a href="/dashboard" className="hover:underline">
-              Dashboard
-            </a>
-          </li>
-        </ul>
+        {/* Mobile Menu */}
+        <AnimatePresence>
+          {isOpen && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3 }}
+              className="md:hidden glass border-t border-border/50"
+            >
+              <div className="px-4 py-6 space-y-4">
+                {navLinks.map((link) => (
+                  <Link
+                    key={link.name}
+                    href={link.href}
+                    className="block text-foreground/80 hover:text-foreground transition-colors font-medium py-2"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    {link.name}
+                  </Link>
+                ))}
+                <div className="pt-4 space-y-3">
+                  <Button
+                    variant="ghost"
+                    asChild
+                    className="w-full"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    <Link href="/login">Login</Link>
+                  </Button>
+                  <Button
+                    asChild
+                    className="w-full bg-gradient-to-r from-primary to-accent hover:opacity-90"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    <Link href="/register">Get Started</Link>
+                  </Button>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </motion.nav>
+  );
+};
 
-        <div className="hidden md:flex items-center gap-3">
-          <Link
-            href="/login"
-            className={cn(buttonVariants({ variant: "outline", size: "sm" }), "flex items-center gap-2")}
-          >
-            <LogIn className="size-4" />
-            Login
-          </Link>
-        </div>
-
-        <div className="md:hidden">
-          <button
-            aria-label="Toggle menu"
-            onClick={() => setOpen(!open)}
-            className="rounded-md p-2"
-          >
-            {open ? <X className="size-5" /> : <Menu className="size-5" />}
-          </button>
-        </div>
-      </nav>
-
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            className="md:hidden"
-          >
-            <div className="glass m-4 rounded-lg p-4">
-              <ul className="flex flex-col gap-3 text-base">
-                <li>
-                  <a href="#">Home</a>
-                </li>
-                <li>
-                  <a href="#features">Features</a>
-                </li>
-                <li>
-                  <a href="#about">About</a>
-                </li>
-                <li>
-                  <a href="/dashboard">Dashboard</a>
-                </li>
-                <li>
-                  <a href="/login" className={cn(buttonVariants({ size: "default" }), "w-full mt-2 inline-flex items-center justify-center")}>Login</a>
-                </li>
-              </ul>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </header>
-  )
-}
+export default Navbar;

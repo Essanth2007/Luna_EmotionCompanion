@@ -1,31 +1,49 @@
-"use client"
+'use client';
 
-import { motion } from "framer-motion"
-import Link from "next/link"
-import { buttonVariants } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
+import Link from 'next/link';
+import { motion } from 'framer-motion';
+import { ArrowRight, Play } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
-export default function HeroButtons() {
+const HeroButtons = () => {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 6 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.45 }}
-      className="flex flex-col sm:flex-row gap-3"
-    >
-      <Link
-        href="/get-started"
-        className={cn(buttonVariants({ size: "lg", variant: "default" }), "px-6")}
+    <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+      <motion.div
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
       >
-        Get Started
-      </Link>
+        <Link href="/register">
+          <Button
+            size="lg"
+            className="bg-gradient-to-r from-primary to-accent hover:opacity-90 text-white px-8 py-6 text-lg shadow-lg shadow-primary/25 w-full sm:w-auto"
+          >
+            <span className="flex items-center gap-2">
+              Get Started Free
+              <ArrowRight className="w-5 h-5" />
+            </span>
+          </Button>
+        </Link>
+      </motion.div>
 
-      <Link
-        href="#learn"
-        className={cn(buttonVariants({ size: "lg", variant: "ghost" }), "px-6")}
+      <motion.div
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
       >
-        Learn More
-      </Link>
-    </motion.div>
-  )
-}
+        <Link href="#features">
+          <Button
+            size="lg"
+            variant="outline"
+            className="px-8 py-6 text-lg border-foreground/20 hover:bg-foreground/5 hover:border-foreground/30 glass w-full sm:w-auto"
+          >
+            <span className="flex items-center gap-2">
+              <Play className="w-5 h-5" />
+              Learn More
+            </span>
+          </Button>
+        </Link>
+      </motion.div>
+    </div>
+  );
+};
+
+export default HeroButtons;
