@@ -1,115 +1,236 @@
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard,
-  Heart,
-  BarChart3,
+  MessageCircle,
+  Video,
+  Mic,
+  Upload,
+  FileText,
+  BookOpen,
   Settings,
   LogOut,
-  Menu,
+  ChevronLeft,
+  ChevronRight,
   X,
+  Sparkles,
+  Flower2,
+  Library,
+  Bell,
   User,
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 
-const Sidebar = () => {
-  const [isOpen, setIsOpen] = useState(false);
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
+
+interface SidebarProps {
+  collapsed: boolean;
+  mobileOpen: boolean;
+  onToggleCollapse: () => void;
+  onMobileClose: () => void;
+}
+
+const navItems = [
+  { name: 'Dashboard',       href: '/dashboard',            icon: LayoutDashboard, color: 'from-blue-500 to-indigo-500' },
+  { name: 'Chat with Luna',  href: '/dashboard/chat',       icon: MessageCircle,   color: 'from-violet-500 to-purple-500' },
+  { name: 'Voice Analysis',  href: '/dashboard/voice',      icon: Mic,             color: 'from-pink-500 to-rose-500' },
+  { name: 'Video Analysis',  href: '/dashboard/video',      icon: Video,           color: 'from-amber-500 to-orange-500' },
+  { name: 'Upload Analysis', href: '/dashboard/upload',     icon: Upload,          color: 'from-emerald-500 to-teal-500' },
+  { name: 'Reports',         href: '/dashboard/reports',    icon: FileText,        color: 'from-cyan-500 to-blue-500' },
+  { name: 'Mood Journal',    href: '/dashboard/journal',    icon: BookOpen,        color: 'from-lime-500 to-green-500' },
+  { name: 'Meditation',      href: '/dashboard/meditation', icon: Flower2,         color: 'from-teal-500 to-cyan-500' },
+  { name: 'Wellness Library',href: '/dashboard/wellness',   icon: Library,         color: 'from-sky-500 to-blue-500' },
+  { name: 'Notifications',   href: '/dashboard/notifications', icon: Bell,         color: 'from-yellow-500 to-amber-500' },
+  { name: 'Profile',         href: '/dashboard/profile',    icon: User,            color: 'from-fuchsia-500 to-pink-500' },
+  { name: 'Settings',        href: '/dashboard/settings',   icon: Settings,        color: 'from-slate-400 to-slate-500' },
+];
+
+export default function Sidebar({
+  collapsed,
+  mobileOpen,
+  onToggleCollapse,
+  onMobileClose,
+}: SidebarProps) {
   const pathname = usePathname();
 
-  const navItems = [
-    { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-    { name: 'Emotions', href: '/dashboard/emotions', icon: Heart },
-    { name: 'Analytics', href: '/dashboard/analytics', icon: BarChart3 },
-    { name: 'Settings', href: '/dashboard/settings', icon: Settings },
-  ];
+  const sidebarContent = (
+    <div className="flex h-full flex-col">
+      {/* Logo */}
+      <div className={cn(
+        'flex items-center px-4 py-5 border-b border-white/[0.06]',
+        collapsed ? 'justify-center' : 'justify-between'
+      )}>
+        <Link
+          href="/dashboard"
+          onClick={onMobileClose}
+          className={cn('flex items-center gap-3', collapsed && 'justify-center')}
+        >
+          <motion.div
+            whileHover={{ scale: 1.08, rotate: 5 }}
+            className="relative flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500 to-blue-600 shadow-lg shadow-violet-500/30"
+          >
+            <Sparkles className="h-5 w-5 text-white" />
+            <div className="absolute inset-0 rounded-2xl bg-white/10 opacity-0 hover:opacity-100 transition-opacity" />
+          </motion.div>
+
+          {!collapsed && (
+            <div>
+              <h2 className="font-bold text-white tracking-tight">Luna</h2>
+              <p className="text-[10px] font-medium uppercase tracking-widest text-white/40">Emotion Companion</p>
+            </div>
+          )}
+        </Link>
+
+        {!collapsed && (
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={onToggleCollapse}
+            className="hidden md:flex h-7 w-7 items-center justify-center rounded-lg text-white/40 hover:bg-white/[0.07] hover:text-white/70 transition-colors"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </motion.button>
+        )}
+      </div>
+
+      {collapsed && (
+        <div className="hidden justify-center border-b border-white/[0.06] py-3 md:flex">
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={onToggleCollapse}
+            className="flex h-7 w-7 items-center justify-center rounded-lg text-white/40 hover:bg-white/[0.07] hover:text-white/70 transition-colors"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </motion.button>
+        </div>
+      )}
+
+      {/* Navigation */}
+      <nav className="flex-1 overflow-y-auto p-3 space-y-0.5 custom-scroll">
+        {navItems.map((item, index) => {
+          const Icon = item.icon;
+          const active = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href + '/'));
+
+          return (
+            <motion.div
+              key={item.name}
+              initial={{ opacity: 0, x: -16 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: index * 0.03, duration: 0.3 }}
+            >
+              <Link
+                href={item.href}
+                onClick={onMobileClose}
+                className={cn(
+                  'group relative flex items-center gap-3 rounded-xl px-3 py-2.5 transition-all duration-200',
+                  collapsed && 'justify-center px-2',
+                  active
+                    ? 'text-white'
+                    : 'text-white/50 hover:text-white/90 hover:bg-white/[0.05]'
+                )}
+              >
+                {active && (
+                  <motion.div
+                    layoutId="activeNav"
+                    className="absolute inset-0 rounded-xl bg-gradient-to-r from-violet-600/30 to-blue-600/20 border border-violet-500/20"
+                    transition={{ type: 'spring', stiffness: 400, damping: 35 }}
+                  />
+                )}
+
+                {/* Icon container */}
+                <div className={cn(
+                  'relative z-10 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg transition-all duration-200',
+                  active
+                    ? `bg-gradient-to-br ${item.color} shadow-lg`
+                    : 'bg-white/[0.06] group-hover:bg-white/[0.1]'
+                )}>
+                  <Icon className={cn('h-4 w-4', active ? 'text-white' : '')} />
+                </div>
+
+                {!collapsed && (
+                  <span className="relative z-10 text-[13px] font-medium">{item.name}</span>
+                )}
+
+                {/* Active indicator dot */}
+                {active && !collapsed && (
+                  <motion.div
+                    layoutId="activeDot"
+                    className="relative z-10 ml-auto h-1.5 w-1.5 rounded-full bg-violet-400"
+                  />
+                )}
+              </Link>
+            </motion.div>
+          );
+        })}
+      </nav>
+
+      {/* Logout */}
+      <div className="border-t border-white/[0.06] p-3">
+        <button
+          className={cn(
+            'group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-white/40 transition-all hover:bg-rose-500/10 hover:text-rose-400',
+            collapsed && 'justify-center'
+          )}
+        >
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/[0.06] group-hover:bg-rose-500/20 transition-colors">
+            <LogOut className="h-4 w-4" />
+          </div>
+          {!collapsed && <span className="text-[13px] font-medium">Logout</span>}
+        </button>
+      </div>
+    </div>
+  );
 
   return (
     <>
-      {/* Mobile Menu Button */}
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={() => setIsOpen(!isOpen)}
-        className="md:hidden fixed top-20 left-4 z-50"
+      <AnimatePresence>
+        {mobileOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onMobileClose}
+            className="fixed inset-0 z-40 bg-black/70 backdrop-blur-sm md:hidden"
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Desktop */}
+      <motion.aside
+        initial={false}
+        animate={{ width: collapsed ? 88 : 256 }}
+        transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+        className="glass-sidebar fixed left-0 top-0 z-50 hidden h-screen md:block overflow-hidden"
       >
-        {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-      </Button>
+        {sidebarContent}
+      </motion.aside>
 
-      {/* Sidebar Overlay (Mobile) */}
-      {isOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 z-40 md:hidden"
-          onClick={() => setIsOpen(false)}
-        />
-      )}
-
-      {/* Sidebar */}
-      <aside
-        className={`fixed left-0 top-20 bottom-0 w-64 glass border-r border-border/50 z-40 transition-transform duration-300 ${
-          isOpen ? 'translate-x-0' : '-translate-x-full'
-        } md:translate-x-0`}
-      >
-        <div className="flex flex-col h-full p-6">
-          {/* Logo */}
-          <Link href="/dashboard" className="flex items-center space-x-2 mb-8">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-              <span className="text-white font-bold text-xl">L</span>
+      {/* Mobile */}
+      <AnimatePresence>
+        {mobileOpen && (
+          <motion.aside
+            initial={{ x: -280 }}
+            animate={{ x: 0 }}
+            exit={{ x: -280 }}
+            transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+            className="glass-sidebar fixed left-0 top-0 z-50 h-screen w-64 md:hidden"
+          >
+            <div className="absolute right-3 top-3 z-10">
+              <button
+                onClick={onMobileClose}
+                className="flex h-7 w-7 items-center justify-center rounded-lg text-white/40 hover:bg-white/[0.07] hover:text-white/70 transition-colors"
+              >
+                <X className="h-4 w-4" />
+              </button>
             </div>
-            <span className="text-xl font-bold text-gradient">Luna</span>
-          </Link>
-
-          {/* Navigation */}
-          <nav className="flex-1 space-y-2">
-            {navItems.map((item) => {
-              const isActive = pathname === item.href;
-              return (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  onClick={() => setIsOpen(false)}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
-                    isActive
-                      ? 'bg-gradient-to-r from-primary/20 to-accent/20 text-primary font-medium'
-                      : 'text-foreground/70 hover:text-foreground hover:bg-foreground/5'
-                  }`}
-                >
-                  <item.icon className="w-5 h-5" />
-                  <span>{item.name}</span>
-                </Link>
-              );
-            })}
-          </nav>
-
-          {/* User Profile */}
-          <div className="border-t border-border/50 pt-6 mt-6">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
-                <User className="w-5 h-5 text-primary" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-medium text-foreground truncate">John Doe</p>
-                <p className="text-xs text-foreground/60 truncate">
-                  john@example.com
-                </p>
-              </div>
-            </div>
-
-            {/* Logout Button */}
-            <Button
-              variant="ghost"
-              className="w-full justify-start text-foreground/70 hover:text-destructive hover:bg-destructive/10"
-            >
-              <LogOut className="w-5 h-5 mr-2" />
-              Logout
-            </Button>
-          </div>
-        </div>
-      </aside>
+            {sidebarContent}
+          </motion.aside>
+        )}
+      </AnimatePresence>
     </>
   );
-};
-
-export default Sidebar;
+}

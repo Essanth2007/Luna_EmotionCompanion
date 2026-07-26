@@ -77,19 +77,18 @@ const Navbar = () => {
 
           {/* Desktop Auth Buttons */}
           <div className="hidden md:flex items-center space-x-4">
-            <Button
-              variant="ghost"
-              asChild
-              className="text-foreground/80 hover:text-foreground"
+            <Link
+              href="/login"
+              className="inline-flex items-center justify-center rounded-lg px-3 py-1.5 text-sm font-medium text-foreground/80 hover:text-foreground transition-colors"
             >
-              <Link href="/login">Login</Link>
-            </Button>
-            <Button
-              asChild
-              className="bg-gradient-to-r from-primary to-accent hover:opacity-90"
+              Login
+            </Link>
+            <Link
+              href="/register"
+              className="inline-flex items-center justify-center rounded-lg px-3 py-1.5 text-sm font-medium bg-gradient-to-r from-primary to-accent text-white hover:opacity-90 transition-opacity"
             >
-              <Link href="/register">Get Started</Link>
-            </Button>
+              Get Started
+            </Link>
             <Button
               variant="ghost"
               size="icon"
@@ -141,21 +140,20 @@ const Navbar = () => {
                   </Link>
                 ))}
                 <div className="pt-4 space-y-3">
-                  <Button
-                    variant="ghost"
-                    asChild
-                    className="w-full"
+                  <Link
+                    href="/login"
+                    className="flex w-full items-center justify-center rounded-lg px-3 py-2 text-sm font-medium hover:bg-muted transition-colors"
                     onClick={() => setIsOpen(false)}
                   >
-                    <Link href="/login">Login</Link>
-                  </Button>
-                  <Button
-                    asChild
-                    className="w-full bg-gradient-to-r from-primary to-accent hover:opacity-90"
+                    Login
+                  </Link>
+                  <Link
+                    href="/register"
+                    className="flex w-full items-center justify-center rounded-lg px-3 py-2 text-sm font-medium bg-gradient-to-r from-primary to-accent text-white hover:opacity-90 transition-opacity"
                     onClick={() => setIsOpen(false)}
                   >
-                    <Link href="/register">Get Started</Link>
-                  </Button>
+                    Get Started
+                  </Link>
                 </div>
               </div>
             </motion.div>

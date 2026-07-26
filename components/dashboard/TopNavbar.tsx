@@ -1,62 +1,107 @@
 'use client';
 
 import { useState } from 'react';
-import { Search, Bell, Moon, Sun, User, ChevronDown } from 'lucide-react';
+import { Search, Bell, Moon, Sun, Menu, Sparkles } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
+import { userData } from '@/components/dashboard/mock-data';
 
-const TopNavbar = ({ title }: { title: string }) => {
-  const [isDark, setIsDark] = useState(false);
+interface TopNavbarProps {
+  onMenuClick: () => void;
+}
+
+const TopNavbar = ({ onMenuClick }: TopNavbarProps) => {
+  const [isDark, setIsDark] = useState(true);
 
   const toggleTheme = () => {
-    setIsDark(!isDark);
+    setIsDark((prev) => !prev);
     document.documentElement.classList.toggle('dark');
   };
 
-  return (
-    <header className="h-16 glass border-b border-border/50 flex items-center justify-between px-6 sticky top-0 z-30">
-      {/* Page Title */}
-      <h1 className="text-xl font-semibold text-foreground">{title}</h1>
+  const initials = userData.name.split(' ').map((n) => n[0]).join('');
 
-      {/* Right Side Actions */}
-      <div className="flex items-center gap-4">
-        {/* Search Bar */}
-        <div className="hidden md:flex items-center relative">
-          <Search className="absolute left-3 w-4 h-4 text-foreground/50" />
+  return (
+    <motion.header
+      initial={{ opacity: 0, y: -12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+      className="glass-navbar sticky top-0 z-30 flex h-16 items-center justify-between px-4 md:px-6"
+    >
+      {/* Left */}
+      <div className="flex items-center gap-3">
+        <motion.button
+          whileTap={{ scale: 0.92 }}
+          onClick={onMenuClick}
+          className="flex h-9 w-9 items-center justify-center rounded-xl text-white/60 hover:bg-white/[0.08] hover:text-white transition-colors md:hidden"
+          aria-label="Open menu"
+        >
+          <Menu className="h-5 w-5" />
+        </motion.button>
+
+        {/* Mobile logo */}
+        <div className="flex items-center gap-2 md:hidden">
+          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500 to-blue-600">
+            <Sparkles className="h-3.5 w-3.5 text-white" />
+          </div>
+          <span className="text-sm font-semibold text-white">Luna</span>
+        </div>
+
+        {/* Desktop breadcrumb */}
+        <div className="hidden md:block">
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-white/35">Mental Health Platform</p>
+          <h1 className="text-base font-semibold text-white leading-tight">Overview</h1>
+        </div>
+      </div>
+
+      {/* Right */}
+      <div className="flex items-center gap-2">
+        {/* Search */}
+        <div className="relative hidden sm:block">
+          <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-white/35" />
           <input
             type="text"
-            placeholder="Search..."
-            className="pl-10 pr-4 py-2 rounded-lg bg-background/50 border border-border/50 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary w-64 text-sm"
+            placeholder="Search insights..."
+            className="h-8 w-44 rounded-xl border border-white/[0.08] bg-white/[0.05] pl-8 pr-3 text-xs text-white placeholder:text-white/30 outline-none transition-all focus:border-violet-500/40 focus:bg-white/[0.08] focus:ring-2 focus:ring-violet-500/15 lg:w-56"
           />
         </div>
 
-        {/* Theme Toggle */}
-        <Button
-          variant="ghost"
-          size="icon"
+        {/* Theme */}
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.92 }}
           onClick={toggleTheme}
-          className="relative"
+          className="flex h-9 w-9 items-center justify-center rounded-xl text-white/50 hover:bg-white/[0.08] hover:text-white transition-colors"
+          aria-label="Toggle theme"
         >
-          {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-        </Button>
+          {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+        </motion.button>
 
         {/* Notifications */}
-        <Button variant="ghost" size="icon" className="relative">
-          <Bell className="w-5 h-5" />
-          <span className="absolute top-1 right-1 w-2 h-2 bg-destructive rounded-full" />
-        </Button>
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.92 }}
+          className="relative flex h-9 w-9 items-center justify-center rounded-xl text-white/50 hover:bg-white/[0.08] hover:text-white transition-colors"
+          aria-label="Notifications"
+        >
+          <Bell className="h-4 w-4" />
+          <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-violet-400 ring-2 ring-[#080c1a]" />
+        </motion.button>
 
-        {/* User Menu */}
-        <div className="flex items-center gap-3 pl-4 border-l border-border/50">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
-            <User className="w-4 h-4 text-primary" />
+        {/* User avatar */}
+        <motion.div
+          whileHover={{ scale: 1.02 }}
+          className="ml-1 flex items-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.05] px-2 py-1.5 cursor-pointer hover:bg-white/[0.08] transition-colors"
+        >
+          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500/40 to-blue-500/40 text-xs font-bold text-violet-200 ring-1 ring-violet-500/30">
+            {initials}
           </div>
-          <div className="hidden md:block">
-            <p className="text-sm font-medium text-foreground">John Doe</p>
+          <div className="hidden md:block pr-1">
+            <p className="text-xs font-semibold text-white leading-tight">{userData.name}</p>
+            <p className="text-[10px] text-white/40">Premium</p>
           </div>
-          <ChevronDown className="w-4 h-4 text-foreground/50 hidden md:block" />
-        </div>
+        </motion.div>
       </div>
-    </header>
+    </motion.header>
   );
 };
 
