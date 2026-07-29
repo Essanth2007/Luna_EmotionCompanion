@@ -1,14 +1,25 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
+
+from app.api.health import router as health_router
+from app.api.speech import router as speech_router
+from app.speech.model_loader import SpeechEmotionModel
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    print("Loading AI models...")
+    SpeechEmotionModel.load()
+    print("AI models loaded.")
+    yield
+
 
 app = FastAPI(
     title="Emotion AI Service",
-    version="1.0.0"
+    version="1.0.0",
+    lifespan=lifespan,
 )
 
-@app.get("/")
-def home():
-    return {
-        "service": "Emotion AI Service",
-        "status": "running",
-        "version": "1.0.0"
-    }
+app.include_router(health_router)
+app.include_router(speech_router)
