@@ -2,103 +2,105 @@
 
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { ArrowRight, Sparkles } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { ArrowRight, Sparkles, Lock } from 'lucide-react';
 
-const CTA = () => {
+export default function CTA() {
   return (
-    <section className="section-padding relative">
+    <section className="section-padding relative overflow-hidden">
       <div className="container-custom">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 32 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="glass rounded-3xl p-12 md:p-20 text-center relative overflow-hidden border border-border/50"
+          viewport={{ once: true, margin: '-80px' }}
+          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+          className="relative overflow-hidden rounded-[32px] border border-white/[0.1] bg-gradient-to-br from-violet-600/20 via-purple-600/10 to-fuchsia-600/15 p-12 text-center backdrop-blur-xl md:p-20"
         >
-          {/* Background Decorative Elements */}
-          <div className="absolute top-0 left-0 w-64 h-64 bg-gradient-to-br from-primary/10 to-accent/10 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
-          <div className="absolute bottom-0 right-0 w-64 h-64 bg-gradient-to-br from-accent/10 to-primary/10 rounded-full blur-3xl translate-x-1/2 translate-y-1/2" />
+          {/* Decorative blobs inside card */}
+          <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-[32px]">
+            <div className="absolute -left-16 -top-16 h-64 w-64 rounded-full bg-violet-500/20 blur-3xl" />
+            <div className="absolute -bottom-16 -right-16 h-64 w-64 rounded-full bg-fuchsia-500/20 blur-3xl" />
+            {/* Top border glow */}
+            <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-violet-400/50 to-transparent" />
+          </div>
 
           <div className="relative z-10">
             {/* Badge */}
             <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
+              initial={{ opacity: 0, scale: 0.85 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-primary/20 to-accent/20 mb-8"
+              transition={{ duration: 0.5, delay: 0.15 }}
+              className="mb-6 inline-flex items-center gap-2 rounded-full border border-violet-400/25 bg-violet-500/15 px-4 py-1.5"
             >
-              <Sparkles className="w-4 h-4 text-primary" />
-              <span className="text-sm font-medium text-foreground/80">
-                Start Your Journey Today
-              </span>
+              <Sparkles className="h-3.5 w-3.5 text-violet-400" />
+              <span className="text-xs font-semibold text-violet-300">Start Your Journey Today</span>
             </motion.div>
 
-            {/* Headline */}
+            {/* Heading */}
             <motion.h2
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-              className="text-4xl md:text-5xl font-bold mb-6"
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="mb-5 text-3xl font-black tracking-tight text-white md:text-5xl"
             >
-              <span className="text-gradient">Ready to Transform</span>
-              <br />
-              <span className="text-foreground">Your Emotional Well-being?</span>
+              Ready to feel{' '}
+              <span
+                className="bg-gradient-to-r from-violet-300 to-fuchsia-300 bg-clip-text text-transparent"
+                style={{ WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}
+              >
+                understood?
+              </span>
             </motion.h2>
 
-            {/* Subheadline */}
+            {/* Sub */}
             <motion.p
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-              className="text-lg text-foreground/70 max-w-2xl mx-auto mb-10"
+              transition={{ duration: 0.6, delay: 0.28 }}
+              className="mx-auto mb-10 max-w-xl text-base text-white/50"
             >
-              Join thousands of users who have already started their emotional wellness 
-              journey with Luna. It's free to get started.
+              Join thousands of people already using Luna to build emotional resilience and inner peace — it's free to get started.
             </motion.p>
 
-            {/* CTA Button */}
+            {/* CTA */}
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.5 }}
+              transition={{ duration: 0.6, delay: 0.35 }}
+              className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center"
             >
               <Link href="/register">
-                <Button
-                  size="lg"
-                  className="bg-gradient-to-r from-primary to-accent hover:opacity-90 text-white px-8 py-6 text-lg shadow-lg shadow-primary/25"
+                <motion.button
+                  whileHover={{ scale: 1.05, boxShadow: '0 0 40px rgba(167,139,250,0.55)' }}
+                  whileTap={{ scale: 0.97 }}
+                  className="flex items-center gap-2.5 rounded-full bg-gradient-to-r from-violet-500 via-purple-500 to-fuchsia-500 px-9 py-4 text-base font-bold text-white shadow-xl shadow-violet-500/30 transition-shadow"
                 >
-                  <span className="flex items-center gap-2">
-                    Get Started Free
-                    <ArrowRight className="w-5 h-5" />
-                  </span>
-                </Button>
+                  Get Started Free
+                  <ArrowRight className="h-4 w-4" />
+                </motion.button>
               </Link>
             </motion.div>
 
-            {/* Trust Indicators */}
+            {/* Trust */}
             <motion.div
               initial={{ opacity: 0 }}
               whileInView={{ opacity: 1 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.6 }}
-              className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4 text-sm text-foreground/60"
+              transition={{ delay: 0.5 }}
+              className="mt-7 flex flex-col items-center gap-2.5 text-xs text-white/30 sm:flex-row sm:justify-center sm:gap-5"
             >
-              <span>No credit card required</span>
-              <span className="hidden sm:inline">•</span>
-              <span>Free forever plan available</span>
-              <span className="hidden sm:inline">•</span>
-              <span>Cancel anytime</span>
+              {['No credit card required', 'Free forever plan', 'Cancel anytime'].map((t, i) => (
+                <span key={i} className="flex items-center gap-1.5">
+                  <Lock className="h-3 w-3" />{t}
+                </span>
+              ))}
             </motion.div>
           </div>
         </motion.div>
       </div>
     </section>
   );
-};
-
-export default CTA;
+}

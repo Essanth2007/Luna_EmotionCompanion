@@ -1,145 +1,96 @@
 'use client';
 
 import Link from 'next/link';
-import { Heart, Mail, MessageCircle, Code } from 'lucide-react';
+import { Heart, Mail, MessageCircle, Code2, ExternalLink } from 'lucide-react';
 
-const Footer = () => {
-  const footerLinks = {
-    product: [
-      { name: 'Features', href: '#features' },
-      { name: 'Pricing', href: '#pricing' },
-      { name: 'Security', href: '#' },
-      { name: 'Roadmap', href: '#' },
-    ],
-    company: [
-      { name: 'About', href: '#about' },
-      { name: 'Blog', href: '#' },
-      { name: 'Careers', href: '#' },
-      { name: 'Contact', href: '#contact' },
-    ],
-    resources: [
-      { name: 'Documentation', href: '#' },
-      { name: 'Help Center', href: '#' },
-      { name: 'Community', href: '#' },
-      { name: 'Privacy Policy', href: '#' },
-    ],
-    legal: [
-      { name: 'Terms of Service', href: '#' },
-      { name: 'Privacy Policy', href: '#' },
-      { name: 'Cookie Policy', href: '#' },
-      { name: 'GDPR', href: '#' },
-    ],
-  };
+const footerLinks = {
+  product:   [{ name: 'Features', href: '#features' }, { name: 'Security', href: '#' }, { name: 'Roadmap', href: '#' }],
+  company:   [{ name: 'About',    href: '#about' },    { name: 'Blog',     href: '#' }, { name: 'Careers', href: '#' }],
+  resources: [{ name: 'Help Center', href: '#' },      { name: 'Community', href: '#' }, { name: 'Privacy', href: '#' }],
+};
 
-  const socialLinks = [
-    { name: 'Twitter', icon: MessageCircle, href: '#' },
-    { name: 'Github', icon: Code, href: '#' },
-    { name: 'LinkedIn', icon: MessageCircle, href: '#' },
-    { name: 'Email', icon: Mail, href: 'mailto:hello@luna.ai' },
-  ];
+const socials = [
+  { label: 'Twitter',  icon: MessageCircle, href: '#' },
+  { label: 'GitHub',   icon: Code2,         href: '#' },
+  { label: 'LinkedIn', icon: ExternalLink,  href: '#' },
+  { label: 'Email',    icon: Mail,          href: 'mailto:hello@luna.ai' },
+];
 
+export default function Footer() {
   return (
-    <footer className="border-t border-border/50 bg-background/50 backdrop-blur-sm">
-      <div className="container-custom py-12 md:py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mb-12">
-          {/* Brand Column */}
-          <div className="lg:col-span-2">
-            <Link href="/" className="flex items-center space-x-2 mb-4">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-                <span className="text-white font-bold text-xl">L</span>
+    <footer className="relative overflow-hidden border-t border-white/[0.07]">
+      {/* Top glow line */}
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-violet-500/40 to-transparent" />
+
+      <div className="container-custom py-14 md:py-16">
+        <div className="grid grid-cols-2 gap-10 md:grid-cols-5 lg:gap-16">
+          {/* Brand */}
+          <div className="col-span-2 md:col-span-2">
+            <Link href="/" className="mb-4 flex items-center gap-2.5">
+              <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500 to-fuchsia-600 shadow-lg shadow-violet-500/25">
+                <svg viewBox="0 0 24 24" className="h-4 w-4 fill-white" aria-hidden>
+                  <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                </svg>
               </div>
-              <span className="text-xl font-bold text-gradient">Luna</span>
+              <span
+                className="text-lg font-extrabold tracking-tight bg-gradient-to-r from-violet-300 to-fuchsia-300 bg-clip-text text-transparent"
+                style={{ WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}
+              >
+                Luna
+              </span>
             </Link>
-            <p className="text-foreground/70 mb-6 max-w-sm">
-              Your AI-powered companion for emotional wellness. Understand your 
-              emotions like never before.
+            <p className="mb-6 max-w-[260px] text-sm leading-relaxed text-white/40">
+              Your AI-powered companion for emotional wellness. Understand your emotions like never before.
             </p>
-            <div className="flex items-center gap-4">
-              {socialLinks.map((social) => (
-                <Link
-                  key={social.name}
-                  href={social.href}
-                  className="w-10 h-10 rounded-full glass flex items-center justify-center hover:bg-primary/20 transition-colors"
-                  aria-label={social.name}
-                >
-                  <social.icon className="w-5 h-5 text-foreground/70 hover:text-primary" />
-                </Link>
-              ))}
+            <div className="flex items-center gap-2.5">
+              {socials.map((s) => {
+                const Icon = s.icon;
+                return (
+                  <Link key={s.label} href={s.href}
+                    className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.04] text-white/40 transition-all hover:border-violet-400/30 hover:bg-violet-500/10 hover:text-violet-300"
+                    aria-label={s.label}
+                  >
+                    <Icon className="h-4 w-4" />
+                  </Link>
+                );
+              })}
             </div>
           </div>
 
-          {/* Product Links */}
-          <div>
-            <h3 className="font-semibold mb-4 text-foreground">Product</h3>
-            <ul className="space-y-3">
-              {footerLinks.product.map((link) => (
-                <li key={link.name}>
-                  <Link
-                    href={link.href}
-                    className="text-foreground/70 hover:text-foreground transition-colors"
-                  >
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Company Links */}
-          <div>
-            <h3 className="font-semibold mb-4 text-foreground">Company</h3>
-            <ul className="space-y-3">
-              {footerLinks.company.map((link) => (
-                <li key={link.name}>
-                  <Link
-                    href={link.href}
-                    className="text-foreground/70 hover:text-foreground transition-colors"
-                  >
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Resources Links */}
-          <div>
-            <h3 className="font-semibold mb-4 text-foreground">Resources</h3>
-            <ul className="space-y-3">
-              {footerLinks.resources.map((link) => (
-                <li key={link.name}>
-                  <Link
-                    href={link.href}
-                    className="text-foreground/70 hover:text-foreground transition-colors"
-                  >
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
+          {/* Links */}
+          {[
+            { title: 'Product',   links: footerLinks.product },
+            { title: 'Company',   links: footerLinks.company },
+            { title: 'Resources', links: footerLinks.resources },
+          ].map(({ title, links }) => (
+            <div key={title}>
+              <h4 className="mb-4 text-xs font-bold uppercase tracking-widest text-white/35">{title}</h4>
+              <ul className="space-y-3">
+                {links.map((l) => (
+                  <li key={l.name}>
+                    <Link href={l.href}
+                      className="text-sm text-white/45 transition-colors hover:text-white/80">
+                      {l.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </div>
 
-        {/* Bottom Bar */}
-        <div className="border-t border-border/50 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-sm text-foreground/60 flex items-center gap-2">
-            Made with <Heart className="w-4 h-4 text-primary fill-primary" /> by Team SparkX
+        {/* Bottom bar */}
+        <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-white/[0.07] pt-8 md:flex-row">
+          <p className="flex items-center gap-1.5 text-xs text-white/30">
+            Made with <Heart className="h-3 w-3 fill-violet-400 text-violet-400" /> by Team SparkX
           </p>
-          <div className="flex items-center gap-6 text-sm text-foreground/60">
-            <Link href="#" className="hover:text-foreground transition-colors">
-              Terms
-            </Link>
-            <Link href="#" className="hover:text-foreground transition-colors">
-              Privacy
-            </Link>
-            <Link href="#" className="hover:text-foreground transition-colors">
-              Cookies
-            </Link>
+          <div className="flex items-center gap-6 text-xs text-white/30">
+            {['Terms', 'Privacy', 'Cookies'].map((t) => (
+              <Link key={t} href="#" className="hover:text-white/60 transition-colors">{t}</Link>
+            ))}
           </div>
         </div>
       </div>
     </footer>
   );
-};
-
-export default Footer;
+}
