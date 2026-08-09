@@ -1,4 +1,5 @@
-from typing import Dict, Any, List
+from datetime import datetime, timedelta, timezone
+from typing import Any, Dict, List
 
 from fastapi import WebSocket
 
@@ -11,17 +12,20 @@ class ConnectionManager:
     def __init__(self):
         self.active_connections: Dict[str, WebSocket] = {}
         self.authenticated_users: Dict[str, str] = {}
+        self.last_seen: Dict[str, datetime] = {}
+        self.pending_messages: Dict[str, List[dict]] = {}
+        self.heartbeat_tolerance: timedelta = timedelta(seconds=30)
 
-    async def connect(
+    def connect(
         self,
         user_id: str,
         websocket: WebSocket,
     ):
         """
-        Accept and register a new WebSocket connection.
+        Register a WebSocket connection.
         """
-        await websocket.accept()
         self.active_connections[user_id] = websocket
+        self.last_seen[user_id] = datetime.now(timezone.utc)
 
     def disconnect(self, user_id: str):
         """
@@ -29,6 +33,44 @@ class ConnectionManager:
         """
         self.active_connections.pop(user_id, None)
         self.authenticated_users.pop(user_id, None)
+        self.last_seen.pop(user_id, None)
+
+    def update_heartbeat(self, user_id: str):
+        """Update the last heartbeat time for a connected user."""
+        if user_id in self.active_connections:
+            self.last_seen[user_id] = datetime.now(timezone.utc)
+
+    def get_stale_connections(self, timeout_seconds: int) -> List[str]:
+        """Return user IDs whose heartbeat is older than the allowed timeout."""
+        stale_users: List[str] = []
+        cutoff = datetime.now(timezone.utc) - timedelta(seconds=timeout_seconds)
+
+        for user_id, last_seen in self.last_seen.items():
+            if last_seen < cutoff:
+                stale_users.append(user_id)
+
+        return stale_users
+
+    def cleanup_stale_connections(self, timeout_seconds: int):
+        """Drop stale connections and their heartbeat state."""
+        for user_id in self.get_stale_connections(timeout_seconds):
+            self.disconnect(user_id)
+
+    def reconnect_user(self, user_id: str, websocket: WebSocket):
+        """Reconnect a user and deliver any queued messages immediately."""
+        self.active_connections[user_id] = websocket
+        self.last_seen[user_id] = datetime.now(timezone.utc)
+
+        pending_messages = self.pending_messages.get(user_id, [])
+        self.pending_messages[user_id] = []
+
+        if pending_messages:
+            for message in pending_messages:
+                try:
+                    import asyncio
+                    asyncio.run(websocket.send_json(message))
+                except Exception:
+                    self.pending_messages.setdefault(user_id, []).append(message)
 
     def register_authenticated_user(self, user_id: str, token: str):
         """Register a user as authenticated for the supplied token."""

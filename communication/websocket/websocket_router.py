@@ -7,7 +7,10 @@ from communication.chat.auth_service import AuthService
 from communication.chat.events import (
     CHAT_ACK,
     CHAT_PRIVATE_MESSAGE,
+    CHAT_READ_ACK,
     CHAT_ROOM_MESSAGE,
+    HEARTBEAT,
+    HEARTBEAT_ACK,
     PING,
     PONG,
     PRESENCE_UPDATE,
@@ -116,6 +119,22 @@ def handle_ping(message: Dict[str, Any]) -> Dict[str, Any]:
     return {"type": PONG}
 
 
+def handle_heartbeat(message: Dict[str, Any]) -> Dict[str, Any]:
+    """Handle a heartbeat event and acknowledge it."""
+    return {"type": HEARTBEAT_ACK}
+
+
+def handle_read_ack(message: Dict[str, Any]) -> Dict[str, Any]:
+    """Handle a read acknowledgement event."""
+    return {
+        "type": CHAT_READ_ACK,
+        "original_message_id": message.get("original_message_id"),
+        "recipient_id": message.get("recipient_id"),
+        "sender_id": message.get("sender_id"),
+        "ack_type": "read",
+    }
+
+
 def handle_unsupported_event(message: Dict[str, Any]) -> Dict[str, Any]:
     """Return the standard unsupported-event response."""
     return {
@@ -154,7 +173,9 @@ async def websocket_endpoint(websocket: WebSocket, user_id: str):
         manager.register_authenticated_user(resolved_user_id, token)
         user_id = resolved_user_id
 
-    await manager.connect(user_id, websocket)
+    await websocket.accept()
+    manager.connect(user_id, websocket)
+    message_service.deliver_pending_messages(user_id)
 
     logger.info(f"{user_id} connected")
 
@@ -170,6 +191,11 @@ async def websocket_endpoint(websocket: WebSocket, user_id: str):
             match message_type:
                 case "ping":
                     await manager.send_personal_message(user_id, handle_ping(message))
+                    continue
+
+                case "heartbeat":
+                    manager.update_heartbeat(user_id)
+                    await manager.send_personal_message(user_id, handle_heartbeat(message))
                     continue
 
                 case "chat_private_message":
@@ -194,6 +220,11 @@ async def websocket_endpoint(websocket: WebSocket, user_id: str):
 
                 case "chat_ack":
                     payload = handle_chat_ack(message)
+                    await manager.send_personal_message(user_id, payload)
+                    continue
+
+                case "chat_read_ack":
+                    payload = handle_read_ack(message)
                     await manager.send_personal_message(user_id, payload)
                     continue
 

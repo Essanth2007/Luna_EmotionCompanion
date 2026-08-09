@@ -5,6 +5,7 @@ from typing import Any, Dict, List, Optional
 
 from communication.chat.message_history import MessageHistory
 from communication.chat.message_models import ChatMessage, MessageAck, PrivateMessage, RoomMessage
+from communication.chat.recovery_service import RecoveryService
 from communication.manager.presence_manager import PresenceManager
 from communication.webrtc.room_manager import RoomManager
 
@@ -24,11 +25,13 @@ class MessageService:
         presence_manager: Optional[PresenceManager] = None,
         room_manager: Optional[RoomManager] = None,
         history: Optional[MessageHistory] = None,
+        recovery_service: Optional[RecoveryService] = None,
     ):
         self.connection_manager = connection_manager
         self.presence_manager = presence_manager or PresenceManager()
         self.room_manager = room_manager or RoomManager()
         self.history = history or MessageHistory()
+        self.recovery_service = recovery_service or RecoveryService()
 
     def send_private_message(
         self,
@@ -47,20 +50,23 @@ class MessageService:
 
         self.history.add_message(private_message)
 
-        if self.connection_manager is not None:
-            asyncio.run(
-                self.connection_manager.send_personal_message(
-                    recipient_id,
-                    private_message.to_dict(),
-                )
-            )
-
-        self.create_ack(
+        delivered_ack = self.create_ack(
             private_message.message_id,
             recipient_id,
             sender_id,
             ack_type="delivered",
         )
+
+        if self.connection_manager is not None:
+            if self.connection_manager.is_connected(recipient_id):
+                asyncio.run(
+                    self.connection_manager.send_personal_message(
+                        recipient_id,
+                        private_message.to_dict(),
+                    )
+                )
+            else:
+                self.recovery_service.queue_message(recipient_id, private_message.to_dict())
 
         return private_message
 
@@ -90,12 +96,15 @@ class MessageService:
                 if member_id == sender_id:
                     continue
 
-                asyncio.run(
-                    self.connection_manager.send_personal_message(
-                        member_id,
-                        room_message.to_dict(),
+                if self.connection_manager.is_connected(member_id):
+                    asyncio.run(
+                        self.connection_manager.send_personal_message(
+                            member_id,
+                            room_message.to_dict(),
+                        )
                     )
-                )
+                else:
+                    self.recovery_service.queue_message(member_id, room_message.to_dict())
 
         self.create_ack(
             room_message.message_id,
@@ -126,6 +135,39 @@ class MessageService:
             "sender_id": sender_id,
             "ack_type": ack_type,
         })
+
+    def create_read_ack(
+        self,
+        original_message_id: str,
+        recipient_id: str,
+        sender_id: str,
+    ) -> MessageAck:
+        """Create a read acknowledgement payload."""
+        return self.create_ack(
+            original_message_id,
+            recipient_id,
+            sender_id,
+            ack_type="read",
+        )
+
+    def deliver_pending_messages(self, user_id: str):
+        """Send queued messages to a reconnected user and clear the queue."""
+        if self.connection_manager is None or not self.connection_manager.is_connected(user_id):
+            return
+
+        pending_messages = self.recovery_service.get_pending_messages(user_id)
+        if not pending_messages:
+            return
+
+        for message in pending_messages:
+            asyncio.run(
+                self.connection_manager.send_personal_message(
+                    user_id,
+                    message,
+                )
+            )
+
+        self.recovery_service.clear_pending_messages(user_id)
 
     def get_history(self) -> List[ChatMessage]:
         """Return all stored messages."""

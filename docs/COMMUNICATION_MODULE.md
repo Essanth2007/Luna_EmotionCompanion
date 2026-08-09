@@ -131,12 +131,15 @@ Sprint 3 supports a structured event-based WebSocket router. Incoming messages a
 - `chat_private_message`
 - `chat_room_message`
 - `chat_ack`
+- `chat_read_ack`
 - `presence_update`
 - `webrtc_offer`
 - `webrtc_answer`
 - `webrtc_ice_candidate`
 - `ping`
 - `pong`
+- `heartbeat`
+- `heartbeat_ack`
 
 ## Example payloads
 
@@ -162,7 +165,7 @@ Sprint 3 supports a structured event-based WebSocket router. Incoming messages a
 }
 ```
 
-### Acknowledgement
+### Delivery acknowledgement
 
 ```json
 {
@@ -171,6 +174,18 @@ Sprint 3 supports a structured event-based WebSocket router. Incoming messages a
   "recipient_id": "bob",
   "sender_id": "alice",
   "ack_type": "delivered"
+}
+```
+
+### Read acknowledgement
+
+```json
+{
+  "type": "chat_read_ack",
+  "original_message_id": "m-1",
+  "recipient_id": "bob",
+  "sender_id": "alice",
+  "ack_type": "read"
 }
 ```
 
@@ -209,6 +224,76 @@ Response:
 {
   "type": "pong"
 }
+```
+
+### Heartbeat / heartbeat acknowledgement
+
+```json
+{
+  "type": "heartbeat"
+}
+```
+
+Response:
+
+```json
+{
+  "type": "heartbeat_ack"
+}
+```
+
+# Delivery acknowledgements
+
+Delivery acknowledgements are generated when a message is accepted for delivery. If the recipient is offline, the message is queued in the recovery service until the user reconnects.
+
+```json
+{
+  "type": "chat_ack",
+  "original_message_id": "m-12",
+  "recipient_id": "bob",
+  "sender_id": "alice",
+  "ack_type": "delivered"
+}
+```
+
+# Read acknowledgements
+
+Read acknowledgements indicate that a client has consumed a message. These are emitted with the `chat_read_ack` event.
+
+```json
+{
+  "type": "chat_read_ack",
+  "original_message_id": "m-12",
+  "recipient_id": "bob",
+  "sender_id": "alice",
+  "ack_type": "read"
+}
+```
+
+# Heartbeat protocol
+
+Clients may send a heartbeat to keep the connection alive and refresh the last-seen timestamp. The server responds with a heartbeat acknowledgement.
+
+```json
+{
+  "type": "heartbeat"
+}
+```
+
+Response:
+
+```json
+{
+  "type": "heartbeat_ack"
+}
+```
+
+# Connection recovery flow
+
+If a target user is offline when a message arrives, the message is placed in a recovery queue. On reconnect, any queued messages are delivered automatically to the user before the socket continues processing new traffic.
+
+```text
+message sent -> recipient offline -> queue message -> reconnect -> deliver queued messages
 ```
 
 # Git Branch
