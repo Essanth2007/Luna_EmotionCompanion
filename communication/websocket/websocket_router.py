@@ -1,6 +1,9 @@
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 import logging
+from typing import Optional
 
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect
+
+from communication.chat.auth_service import AuthService
 from communication.websocket.connection_manager import ConnectionManager
 from communication.webrtc.signaling import SignalingManager
 
@@ -14,6 +17,7 @@ router = APIRouter()
 # Managers
 manager = ConnectionManager()
 signaling = SignalingManager()
+auth_service = AuthService()
 
 
 @router.websocket("/ws/{user_id}")
@@ -29,6 +33,22 @@ async def websocket_endpoint(websocket: WebSocket, user_id: str):
     - ICE Candidate exchange
     - Graceful disconnect
     """
+    token = websocket.query_params.get("token")
+
+    if token is None or not auth_service.validate_token(token):
+        await websocket.accept()
+        await websocket.send_json({
+            "type": "error",
+            "message": "Authentication failed",
+        })
+        await websocket.close(code=1008)
+        logger.warning(f"Rejected unauthenticated websocket connection for {user_id}")
+        return
+
+    resolved_user_id = auth_service.get_user_from_token(token)
+    if resolved_user_id is not None:
+        manager.register_authenticated_user(resolved_user_id, token)
+        user_id = resolved_user_id
 
     await manager.connect(user_id, websocket)
 

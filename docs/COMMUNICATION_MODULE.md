@@ -94,6 +94,34 @@ communication/
 
 ---
 
+# WebSocket Authentication
+
+The WebSocket endpoint accepts a token query parameter for Sprint 3 authentication.
+
+## Token query parameter
+
+Clients connect with a URL in the form:
+
+```text
+ws://localhost:8000/ws/alice?token=token-alice
+```
+
+The `token` value is validated by the `AuthService` before the connection is accepted.
+
+## Successful connection flow
+
+1. Client opens a WebSocket connection with a valid `token` query parameter.
+2. The router validates the token.
+3. The user is resolved from the token store.
+4. The user is registered in the `ConnectionManager` authentication state.
+5. The connection continues with the normal WebSocket signaling flow.
+
+## Failed authentication flow
+
+1. Client opens a WebSocket connection with an invalid or missing token.
+2. The router accepts the socket, sends `{ "type": "error", "message": "Authentication failed" }`, and closes it with code `1008`.
+3. No authenticated session is created and the connection is rejected.
+
 # Git Branch
 
 feature/communication

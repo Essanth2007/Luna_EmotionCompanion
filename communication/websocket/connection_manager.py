@@ -5,11 +5,12 @@ from fastapi import WebSocket
 
 class ConnectionManager:
     """
-    Manages active WebSocket connections.
+    Manages active WebSocket connections and authentication state.
     """
 
     def __init__(self):
         self.active_connections: Dict[str, WebSocket] = {}
+        self.authenticated_users: Dict[str, str] = {}
 
     async def connect(
         self,
@@ -24,9 +25,27 @@ class ConnectionManager:
 
     def disconnect(self, user_id: str):
         """
-        Remove a disconnected user.
+        Remove a disconnected user and clean up authentication state.
         """
         self.active_connections.pop(user_id, None)
+        self.authenticated_users.pop(user_id, None)
+
+    def register_authenticated_user(self, user_id: str, token: str):
+        """Register a user as authenticated for the supplied token."""
+        if not user_id or not user_id.strip():
+            raise ValueError("user_id must not be empty.")
+        if not token or not token.strip():
+            raise ValueError("token must not be empty.")
+
+        self.authenticated_users[user_id] = token
+
+    def is_authenticated(self, user_id: str) -> bool:
+        """Return whether a user is currently authenticated."""
+        return user_id in self.authenticated_users
+
+    def get_user_token(self, user_id: str) -> str | None:
+        """Return the token associated with an authenticated user."""
+        return self.authenticated_users.get(user_id)
 
     async def send_personal_message(
         self,
