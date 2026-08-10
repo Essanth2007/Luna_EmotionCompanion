@@ -16,3 +16,20 @@ SUPPORTED_AUDIO_EXTENSIONS = {
 # Speech Emotion Model
 MODEL_NAME = "Dpngtm/wav2vec2-emotion-recognition"
 MODEL_CACHE_DIR = "./app/models/checkpoints"
+
+# Image Configuration
+
+MAX_IMAGE_SIZE_MB = 10
+
+SUPPORTED_IMAGE_EXTENSIONS = {
+    ".jpg",
+    ".jpeg",
+    ".png",
+    ".webp",
+}
+
+SUPPORTED_IMAGE_CONTENT_TYPES = {
+    "image/jpeg",
+    "image/png",
+    "image/webp",
+}
