@@ -258,6 +258,120 @@ Delivery acknowledgements are generated when a message is accepted for delivery.
 
 # Read acknowledgements
 
+# Voice Calling
+
+The Sprint 4 call layer introduces in-memory call-session management for voice communication. A caller can initiate a call with a unique `call_id`, a target user, and a `media_type` such as `audio` or `video`.
+
+## Call session lifecycle
+
+The `CallManager` tracks live calls using the `CallState` enum:
+
+- `initiated`
+- `ringing`
+- `accepted`
+- `rejected`
+- `ended`
+
+A call is created and immediately registered in the active session list until the caller or recipient transitions it to a terminal state.
+
+# Video Calling
+
+Video calls share the same lifecycle as voice calls. The only difference is the `media_type` value, which is sent as `video` when the client is asking for a camera-enabled session. The router accepts the same call events and normalizes them so either audio or video traffic enters the same call-control flow.
+
+## Call flow
+
+1. Client emits `call_start` with `call_id`, `caller_id`, `receiver_id`, and `media_type`.
+2. The router validates the message and creates a `CallSession` in the in-memory manager.
+3. The receiver receives a `call_start` event and can respond with `call_accept` or `call_reject`.
+4. A connected pair can send `call_end` or `media_mute` / `media_unmute` / `camera_on` / `camera_off` updates.
+
+# Call Event Types
+
+The event constants introduced in Sprint 4 are:
+
+- `call_start`
+- `call_accept`
+- `call_reject`
+- `call_end`
+- `media_mute`
+- `media_unmute`
+- `camera_on`
+- `camera_off`
+
+These constants are defined in the chat event registry so the client and server can use a consistent message vocabulary.
+
+# Call State Diagram
+
+```text
+initiated --> ringing --> accepted
+    \--> rejected
+    \--> ended
+
+accepted --> ended
+rejected --> ended
+```
+
+The call manager stores state transitions in the `CallSession` object and exposes them via `get_call()` and `get_active_calls()`.
+
+# Demo WebSocket Payloads
+
+## Start a call
+
+```json
+{
+  "type": "call_start",
+  "call_id": "call-123",
+  "caller_id": "alice",
+  "receiver_id": "bob",
+  "media_type": "video"
+}
+```
+
+## Accept a call
+
+```json
+{
+  "type": "call_accept",
+  "call_id": "call-123",
+  "user_id": "bob"
+}
+```
+
+## Reject a call
+
+```json
+{
+  "type": "call_reject",
+  "call_id": "call-123",
+  "user_id": "bob",
+  "reason": "busy"
+}
+```
+
+## End a call
+
+```json
+{
+  "type": "call_end",
+  "call_id": "call-123",
+  "user_id": "alice",
+  "reason": "ended_by_user"
+}
+```
+
+## Media control
+
+```json
+{
+  "type": "media_mute",
+  "call_id": "call-123",
+  "user_id": "alice",
+  "control": "mute"
+}
+```
+
+This pattern also supports `media_unmute`, `camera_on`, and `camera_off`.
+
 Read acknowledgements indicate that a client has consumed a message. These are emitted with the `chat_read_ack` event.
 
 ```json

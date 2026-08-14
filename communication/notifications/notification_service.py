@@ -59,8 +59,34 @@ class NotificationService:
         return self.create_notification(
             title="Incoming Call",
             message=f"Incoming call from {caller}.",
-            notification_type="call",
+            notification_type="incoming_call",
             user_id=receiver,
+        )
+
+    def call_accepted(self, caller: str, receiver: str) -> Dict[str, Any]:
+        return self.create_notification(
+            title="Call Accepted",
+            message=f"{receiver} accepted the call from {caller}.",
+            notification_type="call_accepted",
+            user_id=caller,
+        )
+
+    def call_rejected(self, caller: str, receiver: str, reason: str | None = None) -> Dict[str, Any]:
+        details = f" Reason: {reason}." if reason else ""
+        return self.create_notification(
+            title="Call Rejected",
+            message=f"{receiver} rejected the call from {caller}.{details}",
+            notification_type="call_rejected",
+            user_id=caller,
+        )
+
+    def call_ended(self, caller: str, receiver: str, reason: str | None = None) -> Dict[str, Any]:
+        details = f" Reason: {reason}." if reason else ""
+        return self.create_notification(
+            title="Call Ended",
+            message=f"The call between {caller} and {receiver} has ended.{details}",
+            notification_type="call_ended",
+            user_id=caller,
         )
 
     def missed_call(self, caller: str, receiver: str) -> Dict[str, Any]:

@@ -1,7 +1,8 @@
-from typing import Dict, Any
+from typing import Any, Dict, List, Optional
 
 from communication.websocket.connection_manager import ConnectionManager
 from communication.manager.presence_manager import PresenceManager
+from communication.webrtc.call_manager import CallManager, CallSession
 from communication.webrtc.room_manager import RoomManager
 from communication.notifications.notification_service import NotificationService
 
@@ -15,6 +16,7 @@ class CommunicationService:
         self.connection_manager = ConnectionManager()
         self.presence_manager = PresenceManager()
         self.room_manager = RoomManager()
+        self.call_manager = CallManager()
         self.notification_service = NotificationService()
 
     # -------------------------------------------------
@@ -55,6 +57,77 @@ class CommunicationService:
 
     def get_all_rooms(self):
         return self.room_manager.get_all_rooms()
+
+    # -------------------------------------------------
+    # Call Management
+    # -------------------------------------------------
+
+    def create_call(
+        self,
+        caller_id: str,
+        receiver_id: str,
+        media_type: str = "audio",
+        call_id: Optional[str] = None,
+    ) -> CallSession:
+        """Create a voice or video call session."""
+        session = self.call_manager.create_call(
+            caller_id=caller_id,
+            receiver_id=receiver_id,
+            media_type=media_type,
+            call_id=call_id,
+        )
+        self.notification_service.incoming_call(caller_id, receiver_id)
+        return session
+
+    def accept_call(self, call_id: str, user_id: str) -> CallSession:
+        """Accept an active call."""
+        session = self.call_manager.accept_call(call_id, user_id)
+        self.notification_service.create_notification(
+            title="Call Accepted",
+            message=f"{user_id} accepted the call.",
+            notification_type="call_accepted",
+            user_id=user_id,
+        )
+        return session
+
+    def reject_call(
+        self,
+        call_id: str,
+        user_id: str,
+        reason: Optional[str] = None,
+    ) -> CallSession:
+        """Reject an active call."""
+        session = self.call_manager.reject_call(call_id, user_id, reason=reason)
+        self.notification_service.create_notification(
+            title="Call Rejected",
+            message=f"{user_id} rejected the call.",
+            notification_type="call_rejected",
+            user_id=user_id,
+        )
+        return session
+
+    def end_call(self, call_id: str, user_id: str) -> CallSession:
+        """Terminate an active call."""
+        session = self.call_manager.end_call(call_id, user_id)
+        self.notification_service.create_notification(
+            title="Call Ended",
+            message=f"{user_id} ended the call.",
+            notification_type="call_ended",
+            user_id=user_id,
+        )
+        return session
+
+    def get_call(self, call_id: str) -> Optional[CallSession]:
+        """Return a call session by ID."""
+        return self.call_manager.get_call(call_id)
+
+    def get_active_calls(self) -> List[CallSession]:
+        """Return all active calls."""
+        return self.call_manager.get_active_calls()
+
+    def remove_call(self, call_id: str) -> None:
+        """Remove a call from the manager."""
+        self.call_manager.remove_call(call_id)
 
     # -------------------------------------------------
     # Notifications
@@ -131,4 +204,5 @@ class CommunicationService:
             "active_rooms": self.room_manager.get_room_count(),
             "active_connections": self.connection_manager.get_connection_count(),
             "connected_users": self.connection_manager.get_connected_users(),
+            "active_calls": [call.call_id for call in self.get_active_calls()],
         }
