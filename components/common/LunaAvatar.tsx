@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import Image from 'next/image';
+// using native <img> for dynamic public image paths
 import { cn } from '@/lib/utils';
 
 interface LunaAvatarProps {
@@ -39,11 +39,12 @@ const emojiSizes = {
 };
 
 const stateImages: Record<string, string> = {
-  default:   '/assets/luna/images/luna.png',
-  happy:     '/assets/luna/images/luna-happy.png',
-  thinking:  '/assets/luna/images/luna-thinking.png',
-  sad:       '/assets/luna/images/luna-sad.png',
-  listening: '/assets/luna/images/luna-listening.gif',
+  default:   '/assets/luna/images/luna.jpeg',
+  happy:     '/assets/luna/images/luna-happy.jpeg',
+  thinking:  '/assets/luna/images/luna-thinking.jpeg',
+  sad:       '/assets/luna/images/luna-sad.jpeg',
+  // 'listening' uses the thinking image as a fallback (no GIF present)
+  listening: '/assets/luna/images/luna-thinking.jpeg',
 };
 
 const stateEmojis: Record<string, string> = {
@@ -95,13 +96,11 @@ export const LunaAvatar = ({
       >
         {/* Real image (if available and not errored) */}
         {!imgError ? (
-          <Image
+          <img
             src={stateImages[state]}
             alt={`Luna ${state}`}
-            fill
-            className="object-contain"
+            className="w-full h-full object-contain"
             onError={() => setImgError(true)}
-            priority={size === 'xl' || size === '2xl'}
           />
         ) : (
           /* Emoji fallback */
