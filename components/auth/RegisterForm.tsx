@@ -5,65 +5,55 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { User, Mail, Lock, Eye, EyeOff, Loader2, Check } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { User, Mail, Lock, Eye, EyeOff, Loader2, AlertCircle } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
 
-const registerSchema = z
+const schema = z
   .object({
-    name: z.string().min(2, 'Name must be at least 2 characters'),
-    email: z.string().email('Invalid email address'),
-    password: z.string().min(8, 'Password must be at least 8 characters'),
+    name:            z.string().min(2, 'Name must be at least 2 characters'),
+    email:           z.string().email('Invalid email address'),
+    password:        z.string().min(8, 'Password must be at least 8 characters'),
     confirmPassword: z.string(),
-    terms: z.boolean().refine((val) => val === true, {
-      message: 'You must accept the terms and conditions',
-    }),
+    terms:           z.boolean().refine((v) => v === true, { message: 'You must accept the terms' }),
   })
-  .refine((data) => data.password === data.confirmPassword, {
+  .refine((d) => d.password === d.confirmPassword, {
     message: "Passwords don't match",
-    path: ['confirmPassword'],
+    path:    ['confirmPassword'],
   });
 
-type RegisterFormData = z.infer<typeof registerSchema>;
+type FormData = z.infer<typeof schema>;
 
-const RegisterForm = () => {
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
+const inputCls =
+  'w-full rounded-2xl border border-white/[0.1] bg-white/[0.05] px-4 py-3 text-sm text-white placeholder:text-white/30 outline-none transition-all focus:border-violet-500/50 focus:ring-2 focus:ring-violet-500/15 backdrop-blur-sm';
 
-  const {
-    register,
-    handleSubmit,
-    watch,
-    formState: { errors },
-  } = useForm<RegisterFormData>({
-    resolver: zodResolver(registerSchema),
+const strengthLabel = ['', 'Weak', 'Fair', 'Good', 'Strong'];
+const strengthColor = ['', 'bg-rose-500', 'bg-amber-500', 'bg-yellow-400', 'bg-emerald-500'];
+
+function getStrength(pw: string) {
+  if (!pw) return 0;
+  let s = 0;
+  if (pw.length >= 8) s++;
+  if (/[a-z]/.test(pw) && /[A-Z]/.test(pw)) s++;
+  if (/\d/.test(pw)) s++;
+  if (/[^a-zA-Z0-9]/.test(pw)) s++;
+  return s;
+}
+
+export default function RegisterForm() {
+  const [showPw, setShowPw]     = useState(false);
+  const [showCpw, setShowCpw]   = useState(false);
+  const { register: doRegister, isLoading, error } = useAuth();
+
+  const { register, handleSubmit, watch, formState: { errors } } = useForm<FormData>({
+    resolver: zodResolver(schema),
   });
 
-  const password = watch('password', '');
+  const pw       = watch('password', '');
+  const strength = getStrength(pw);
 
-  const getPasswordStrength = (password: string) => {
-    if (!password) return 0;
-    let strength = 0;
-    if (password.length >= 8) strength += 1;
-    if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength += 1;
-    if (/\d/.test(password)) strength += 1;
-    if (/[^a-zA-Z0-9]/.test(password)) strength += 1;
-    return strength;
-  };
-
-  const passwordStrength = getPasswordStrength(password);
-
-  const onSubmit = async (data: RegisterFormData) => {
-    setIsLoading(true);
-    // Placeholder for actual registration logic
-    console.log('Register data:', data);
-    setTimeout(() => {
-      setIsLoading(false);
-      router.push('/dashboard');
-    }, 2000);
+  const onSubmit = async (data: FormData) => {
+    await doRegister(data.name, data.email, data.password);
   };
 
   return (
@@ -73,185 +63,104 @@ const RegisterForm = () => {
       transition={{ duration: 0.5 }}
       className="w-full max-w-md"
     >
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-        {/* Name Field */}
-        <div className="space-y-2">
-          <label htmlFor="name" className="text-sm font-medium text-foreground">
-            Full Name
-          </label>
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+
+        {error && (
+          <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}
+            className="flex items-center gap-2 rounded-2xl border border-rose-500/25 bg-rose-500/10 px-4 py-3 text-sm text-rose-300">
+            <AlertCircle className="h-4 w-4 shrink-0" />{error}
+          </motion.div>
+        )}
+
+        {/* Name */}
+        <div className="space-y-1.5">
+          <label className="text-xs font-semibold uppercase tracking-wider text-white/50">Full Name</label>
           <div className="relative">
-            <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-foreground/50" />
-            <input
-              id="name"
-              type="text"
-              placeholder="John Doe"
-              {...register('name')}
-              className="w-full pl-10 pr-4 py-3 rounded-lg border border-border/50 bg-background/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all placeholder:text-foreground/30"
-            />
+            <User className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/30" />
+            <input type="text" placeholder="Your name" {...register('name')}
+              className={`${inputCls} pl-10`} />
           </div>
-          {errors.name && (
-            <p className="text-sm text-destructive">{errors.name.message}</p>
-          )}
+          {errors.name && <p className="text-xs text-rose-400">{errors.name.message}</p>}
         </div>
 
-        {/* Email Field */}
-        <div className="space-y-2">
-          <label htmlFor="email" className="text-sm font-medium text-foreground">
-            Email
-          </label>
+        {/* Email */}
+        <div className="space-y-1.5">
+          <label className="text-xs font-semibold uppercase tracking-wider text-white/50">Email</label>
           <div className="relative">
-            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-foreground/50" />
-            <input
-              id="email"
-              type="email"
-              placeholder="you@example.com"
-              {...register('email')}
-              className="w-full pl-10 pr-4 py-3 rounded-lg border border-border/50 bg-background/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all placeholder:text-foreground/30"
-            />
+            <Mail className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/30" />
+            <input type="email" placeholder="you@example.com" {...register('email')}
+              className={`${inputCls} pl-10`} />
           </div>
-          {errors.email && (
-            <p className="text-sm text-destructive">{errors.email.message}</p>
-          )}
+          {errors.email && <p className="text-xs text-rose-400">{errors.email.message}</p>}
         </div>
 
-        {/* Password Field */}
-        <div className="space-y-2">
-          <label htmlFor="password" className="text-sm font-medium text-foreground">
-            Password
-          </label>
+        {/* Password */}
+        <div className="space-y-1.5">
+          <label className="text-xs font-semibold uppercase tracking-wider text-white/50">Password</label>
           <div className="relative">
-            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-foreground/50" />
-            <input
-              id="password"
-              type={showPassword ? 'text' : 'password'}
-              placeholder="••••••••"
-              {...register('password')}
-              className="w-full pl-10 pr-12 py-3 rounded-lg border border-border/50 bg-background/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all placeholder:text-foreground/30"
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground/50 hover:text-foreground transition-colors"
-            >
-              {showPassword ? (
-                <EyeOff className="w-5 h-5" />
-              ) : (
-                <Eye className="w-5 h-5" />
-              )}
+            <Lock className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/30" />
+            <input type={showPw ? 'text' : 'password'} placeholder="••••••••" {...register('password')}
+              className={`${inputCls} pl-10 pr-11`} />
+            <button type="button" onClick={() => setShowPw(!showPw)}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition-colors">
+              {showPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
           </div>
-          {errors.password && (
-            <p className="text-sm text-destructive">{errors.password.message}</p>
-          )}
-          {/* Password Strength Indicator */}
-          {password && (
-            <div className="space-y-2">
+          {errors.password && <p className="text-xs text-rose-400">{errors.password.message}</p>}
+          {pw && (
+            <div className="space-y-1">
               <div className="flex gap-1">
-                {[0, 1, 2, 3].map((index) => (
-                  <div
-                    key={index}
-                    className={`h-1 flex-1 rounded-full transition-colors ${
-                      index < passwordStrength
-                        ? passwordStrength <= 1
-                          ? 'bg-destructive'
-                          : passwordStrength <= 2
-                          ? 'bg-yellow-500'
-                          : 'bg-primary'
-                        : 'bg-border'
-                    }`}
-                  />
+                {[1,2,3,4].map((i) => (
+                  <div key={i} className={`h-1 flex-1 rounded-full transition-colors ${i <= strength ? strengthColor[strength] : 'bg-white/10'}`} />
                 ))}
               </div>
-              <p className="text-xs text-foreground/60">
-                {passwordStrength <= 1 && 'Weak password'}
-                {passwordStrength === 2 && 'Fair password'}
-                {passwordStrength === 3 && 'Good password'}
-                {passwordStrength === 4 && 'Strong password'}
-              </p>
+              <p className="text-[10px] text-white/40">{strengthLabel[strength]} password</p>
             </div>
           )}
         </div>
 
-        {/* Confirm Password Field */}
-        <div className="space-y-2">
-          <label htmlFor="confirmPassword" className="text-sm font-medium text-foreground">
-            Confirm Password
-          </label>
+        {/* Confirm Password */}
+        <div className="space-y-1.5">
+          <label className="text-xs font-semibold uppercase tracking-wider text-white/50">Confirm Password</label>
           <div className="relative">
-            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-foreground/50" />
-            <input
-              id="confirmPassword"
-              type={showConfirmPassword ? 'text' : 'password'}
-              placeholder="••••••••"
-              {...register('confirmPassword')}
-              className="w-full pl-10 pr-12 py-3 rounded-lg border border-border/50 bg-background/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all placeholder:text-foreground/30"
-            />
-            <button
-              type="button"
-              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground/50 hover:text-foreground transition-colors"
-            >
-              {showConfirmPassword ? (
-                <EyeOff className="w-5 h-5" />
-              ) : (
-                <Eye className="w-5 h-5" />
-              )}
+            <Lock className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/30" />
+            <input type={showCpw ? 'text' : 'password'} placeholder="••••••••" {...register('confirmPassword')}
+              className={`${inputCls} pl-10 pr-11`} />
+            <button type="button" onClick={() => setShowCpw(!showCpw)}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition-colors">
+              {showCpw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
           </div>
-          {errors.confirmPassword && (
-            <p className="text-sm text-destructive">{errors.confirmPassword.message}</p>
-          )}
+          {errors.confirmPassword && <p className="text-xs text-rose-400">{errors.confirmPassword.message}</p>}
         </div>
 
-        {/* Terms and Conditions */}
-        <div className="flex items-start space-x-2">
-          <input
-            id="terms"
-            type="checkbox"
-            {...register('terms')}
-            className="w-4 h-4 mt-0.5 rounded border-border/50 bg-background/50 text-primary focus:ring-primary/50"
-          />
-          <label htmlFor="terms" className="text-sm text-foreground/70">
+        {/* Terms */}
+        <label className="flex cursor-pointer items-start gap-2.5">
+          <input type="checkbox" {...register('terms')}
+            className="mt-0.5 h-4 w-4 rounded border-white/20 bg-white/10 accent-violet-500" />
+          <span className="text-xs text-white/50">
             I agree to the{' '}
-            <Link href="#" className="text-primary hover:underline">
-              Terms of Service
-            </Link>{' '}
-            and{' '}
-            <Link href="#" className="text-primary hover:underline">
-              Privacy Policy
-            </Link>
-          </label>
-        </div>
-        {errors.terms && (
-          <p className="text-sm text-destructive">{errors.terms.message}</p>
-        )}
+            <Link href="#" className="text-violet-400 hover:text-violet-300">Terms of Service</Link>
+            {' '}and{' '}
+            <Link href="#" className="text-violet-400 hover:text-violet-300">Privacy Policy</Link>
+          </span>
+        </label>
+        {errors.terms && <p className="text-xs text-rose-400">{errors.terms.message}</p>}
 
-        {/* Submit Button */}
-        <Button
-          type="submit"
-          disabled={isLoading}
-          className="w-full bg-gradient-to-r from-primary to-accent hover:opacity-90 text-white py-6 text-lg shadow-lg shadow-primary/25"
-        >
-          {isLoading ? (
-            <span className="flex items-center gap-2">
-              <Loader2 className="w-5 h-5 animate-spin" />
-              Creating account...
-            </span>
-          ) : (
-            'Create Account'
-          )}
-        </Button>
+        {/* Submit */}
+        <motion.button type="submit" disabled={isLoading}
+          whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
+          className="btn-glow flex w-full items-center justify-center gap-2 rounded-full py-3.5 text-sm font-bold text-white disabled:opacity-60">
+          {isLoading ? <><Loader2 className="h-4 w-4 animate-spin" /> Creating account…</> : 'Create Account'}
+        </motion.button>
 
-        {/* Sign In Link */}
-        <p className="text-center text-sm text-foreground/70">
+        <p className="text-center text-xs text-white/45">
           Already have an account?{' '}
-          <Link href="/login" className="text-primary hover:underline font-medium">
+          <Link href="/login" className="font-semibold text-violet-400 hover:text-violet-300 transition-colors">
             Sign in
           </Link>
         </p>
       </form>
     </motion.div>
   );
-};
-
-export default RegisterForm;
+}

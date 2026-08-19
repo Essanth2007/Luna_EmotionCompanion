@@ -1,6 +1,5 @@
 'use client';
 
-import { useRef } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight, Heart, BarChart2, MessageCircle, Star, Lock } from 'lucide-react';
 import Link from 'next/link';
@@ -89,7 +88,7 @@ export default function Hero() {
             {/* Heading */}
             <motion.div {...fadeUp(0.2)}>
               <h1 className="text-[3.25rem] font-black leading-[1.05] tracking-tight text-white md:text-[4rem] lg:text-[4.25rem]">
-                Hi, I'm{' '}
+                Hi, I&apos;m{' '}
                 <span
                   className="bg-gradient-to-r from-violet-300 via-purple-300 to-fuchsia-300 bg-clip-text text-transparent"
                   style={{ WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}
@@ -97,7 +96,7 @@ export default function Hero() {
                   Luna
                 </span>
                 <br />
-                <span className="text-white/90">I'm here for you.</span>
+                <span className="text-white/90">I&apos;m here for you.</span>
               </h1>
             </motion.div>
 

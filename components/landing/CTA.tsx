@@ -61,7 +61,7 @@ export default function CTA() {
               transition={{ duration: 0.6, delay: 0.28 }}
               className="mx-auto mb-10 max-w-xl text-base text-white/50"
             >
-              Join thousands of people already using Luna to build emotional resilience and inner peace — it's free to get started.
+              Join thousands of people already using Luna to build emotional resilience and inner peace — it&apos;s free to get started.
             </motion.p>
 
             {/* CTA */}

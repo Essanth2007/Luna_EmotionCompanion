@@ -1,4 +1,4 @@
-import { api, handleApiCall, ApiResponse } from './api';
+// Frontend service - backend integration will be handled by separate backend team
 
 // Video Analysis Types
 export interface VideoAnalysisResult {

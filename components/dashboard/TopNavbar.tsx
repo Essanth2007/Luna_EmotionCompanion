@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import { Search, Bell, Moon, Sun, Menu, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { Button } from '@/components/ui/button';
 import { userData } from '@/components/dashboard/mock-data';
+import { getStoredUser } from '@/store/auth';
 
 interface TopNavbarProps {
   onMenuClick: () => void;
@@ -18,7 +18,9 @@ const TopNavbar = ({ onMenuClick }: TopNavbarProps) => {
     document.documentElement.classList.toggle('dark');
   };
 
-  const initials = userData.name.split(' ').map((n) => n[0]).join('');
+  const storedUser = getStoredUser();
+  const displayName = storedUser?.name ?? userData.name;
+  const initials = displayName.split(' ').map((n: string) => n[0]).join('').slice(0,2);
 
   return (
     <motion.header
@@ -96,7 +98,7 @@ const TopNavbar = ({ onMenuClick }: TopNavbarProps) => {
             {initials}
           </div>
           <div className="hidden md:block pr-1">
-            <p className="text-xs font-semibold text-white leading-tight">{userData.name}</p>
+            <p className="text-xs font-semibold text-white leading-tight">{displayName}</p>
             <p className="text-[10px] text-white/40">Premium</p>
           </div>
         </motion.div>

@@ -1,35 +1,41 @@
-import Navbar from '@/components/layout/Navbar';
 import RegisterForm from '@/components/auth/RegisterForm';
+import Link from 'next/link';
 
 export default function RegisterPage() {
   return (
-    <div className="min-h-screen bg-background relative overflow-hidden">
-      {/* Background Decorative Elements */}
-      <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-        <div className="absolute top-20 left-10 w-64 h-64 bg-gradient-to-br from-primary/10 to-accent/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-gradient-to-br from-accent/10 to-primary/10 rounded-full blur-3xl" />
+    <div className="luna-bg relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-12">
+      {/* Blobs */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="absolute -top-32 left-[-5%] h-[500px] w-[500px] rounded-full bg-fuchsia-600/15 blur-[120px]" />
+        <div className="absolute -bottom-20 right-[-5%] h-[400px] w-[400px] rounded-full bg-violet-600/12 blur-[100px]" />
       </div>
 
-      <Navbar />
-
-      <main className="flex items-center justify-center min-h-[calc(100vh-80px)] px-4 py-12 relative z-10">
-        <div className="w-full max-w-md">
-          {/* Register Card */}
-          <div className="glass rounded-3xl p-8 md:p-12 border border-border/50 shadow-xl">
-            {/* Header */}
-            <div className="text-center mb-8">
-              <h1 className="text-3xl font-bold mb-2">
-                <span className="text-gradient">Create account</span>
-              </h1>
-              <p className="text-foreground/70">
-                Start your emotional wellness journey
-              </p>
+      <div className="relative z-10 w-full max-w-md">
+        {/* Logo */}
+        <div className="mb-8 text-center">
+          <Link href="/" className="inline-flex items-center gap-2.5">
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500 to-blue-600 shadow-lg shadow-violet-500/30">
+              <svg viewBox="0 0 24 24" className="h-5 w-5 fill-white"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
             </div>
-
-            <RegisterForm />
-          </div>
+            <span className="text-xl font-extrabold text-gradient">Luna</span>
+          </Link>
         </div>
-      </main>
+
+        {/* Card */}
+        <div className="glass-card p-8 md:p-10">
+          <div className="mb-7 text-center">
+            <h1 className="text-2xl font-bold text-white">Create your account</h1>
+            <p className="mt-1 text-sm text-white/45">Start your emotional wellness journey today</p>
+          </div>
+          <RegisterForm />
+        </div>
+
+        <p className="mt-6 text-center text-xs text-white/25">
+          By registering you agree to our{' '}
+          <Link href="#" className="text-white/45 hover:text-white/60 transition-colors">Terms</Link>{' '}and{' '}
+          <Link href="#" className="text-white/45 hover:text-white/60 transition-colors">Privacy Policy</Link>
+        </p>
+      </div>
     </div>
   );
 }

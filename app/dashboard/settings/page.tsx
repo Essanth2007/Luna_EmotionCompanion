@@ -9,6 +9,7 @@ import { LunaAvatar } from '@/components/common/LunaAvatar';
 import { Switch } from '@/components/ui/switch';
 import { profileService } from '@/services/profile';
 import { useRouter } from 'next/navigation';
+import { clearAuth } from '@/store/auth';
 
 const themes = [
   { id: 'light',  label: 'Light',  icon: Sun },
@@ -191,7 +192,7 @@ export default function SettingsPage() {
           </motion.button>
 
           <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
-            onClick={() => { localStorage.removeItem('token'); router.push('/'); }}
+            onClick={() => { clearAuth(); document.cookie = 'luna_auth_token=; path=/; max-age=0'; router.push('/login'); }}
             className="ml-auto flex items-center gap-2 rounded-full border border-rose-500/30 bg-rose-500/10 px-6 py-2.5 text-sm font-bold text-rose-400 hover:bg-rose-500/20 transition-colors">
             <LogOut className="h-4 w-4" /> Logout
           </motion.button>

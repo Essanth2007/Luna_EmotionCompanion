@@ -1,4 +1,4 @@
-import { api, handleApiCall, ApiResponse } from './api';
+// Frontend service - backend integration will be handled by separate backend team
 
 // Report Types
 export interface ReportData {

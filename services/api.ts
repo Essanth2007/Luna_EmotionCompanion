@@ -92,7 +92,7 @@ export const handleApiCall = async <T>(
   try {
     const response = await apiCall;
     return { data: response, error: null };
-  } catch (error) {
+  } catch (error: unknown) {
     const errorMessage =
       error instanceof AxiosError
         ? (error.response?.data?.message as string) || error.message

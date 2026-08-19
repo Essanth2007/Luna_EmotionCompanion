@@ -69,7 +69,7 @@ const ForgotPasswordForm = () => {
                   Reset your password
                 </h2>
                 <p className="text-sm text-foreground/70">
-                  Enter your email address and we'll send you a link to reset your password.
+                  Enter your email address and we&apos;ll send you a link to reset your password.
                 </p>
               </div>
 
@@ -130,7 +130,7 @@ const ForgotPasswordForm = () => {
                 Check your email
               </h2>
               <p className="text-sm text-foreground/70">
-                We've sent a password reset link to your email address. Please check your inbox and follow the instructions.
+                We&apos;ve sent a password reset link to your email address. Please check your inbox and follow the instructions.
               </p>
             </div>
 

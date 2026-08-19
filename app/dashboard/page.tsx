@@ -6,7 +6,7 @@ import {
   MessageCircle, Mic, Video, Upload,
   TrendingUp, Sparkles, ArrowRight,
   Flame, Heart, Calendar, Bell,
-  Activity, BookOpen, Flower2,
+  Activity, BookOpen, Flower2, Phone,
 } from 'lucide-react';
 import Link from 'next/link';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
@@ -16,6 +16,7 @@ import { MoodSelector } from '@/components/common/MoodSelector';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { emotionService } from '@/services/emotion';
+import { getStoredUser } from '@/store/auth';
 
 const quickActions = [
   { icon: MessageCircle, label: 'Chat with Luna', href: '/dashboard/chat',    gradient: 'from-violet-600 to-purple-600', glow: 'shadow-violet-500/30', desc: 'AI companion' },
@@ -50,6 +51,8 @@ const stats = [
 
 export default function DashboardPage() {
   const [selectedMood, setSelectedMood] = useState('');
+  const user = getStoredUser();
+  const firstName = user?.name?.split(' ')[0] ?? 'there';
 
   const handleMoodSelect = async (mood: any) => {
     setSelectedMood(mood.id);
@@ -77,7 +80,7 @@ export default function DashboardPage() {
                 </span>
               </div>
               <h1 className="text-2xl font-bold text-white md:text-3xl">
-                Welcome back, <span className="text-gradient">Divya</span> 👋
+                Welcome back, <span className="text-gradient">{firstName}</span> 👋
               </h1>
               <p className="mt-1.5 text-sm text-white/55 max-w-lg">
                 I'm Luna. How are you feeling today? Let's continue your wellness journey together.
