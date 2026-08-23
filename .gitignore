@@ -1,0 +1,53 @@
+# ===================== Dependencies =====================
+node_modules/
+.pnp/
+.pnp.js
+.pnpm-store/
+
+# ===================== Build output =====================
+.next/
+out/
+dist/
+build/
+*.tsbuildinfo
+
+# ===================== Python =====================
+__pycache__/
+*.py[cod]
+.venv/
+.venv-*/
+venv/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# ===================== Environment / secrets =====================
+.env
+.env.*
+!.env.example
+.env.local
+
+# ===================== Logs / temp artifacts =====================
+*.log
+*.err
+*.out
+qa_artifacts/
+
+# ===================== Model weights (downloaded at runtime) =====================
+**/app/models/checkpoints/
+**/models--*/
+
+# ===================== Editor / OS =====================
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# ===================== Docker volumes =====================
+pgdata/
+
+# ===================== Misc =====================
+Luna_Review.zip
