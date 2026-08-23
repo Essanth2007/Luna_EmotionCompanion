@@ -44,8 +44,8 @@ if (Test-Path $beEnvPath) {
 function Start-Svc($name, $venv, $dir, $module, $port, $log) {
   $conn = Get-NetTCPConnection -LocalPort $port -ErrorAction SilentlyContinue
   if ($conn) {
-    $pid = $conn[0].OwningProcess
-    Write-Output "[$name] already running on :$port (pid $pid)"
+    $processId = $conn[0].OwningProcess
+    Write-Output "[$name] already running on :$port (pid $processId)"
     return
   }
   Start-Process -FilePath (Join-Path $venv 'Scripts\python.exe') `
@@ -77,12 +77,20 @@ Start-Svc 'Comm'     (Join-Path $CO '.venv-comm')    $CO 'communication.main:app
 # Frontend (Next.js dev)
 # Launch through cmd so that `npm` (npm.cmd / npm.ps1) resolves via PATH on
 # any machine instead of relying on Start-Process locating a bare executable.
+# Frontend (Next.js production server)
 $feconn = Get-NetTCPConnection -LocalPort 3000 -ErrorAction SilentlyContinue
 if (-not $feconn) {
-  Start-Process -FilePath 'cmd.exe' -ArgumentList '/c', 'npm run dev' `
-    -WorkingDirectory $FE -RedirectStandardOutput (Join-Path $FE 'fe.out') -RedirectStandardError (Join-Path $FE 'fe.err') `
-    -WindowStyle Hidden
-  Write-Output "[Frontend] starting on :3000 (logs: $FE\fe.out / $FE\fe.err)"
+  if (-not (Test-Path (Join-Path $FE '.next'))) {
+    Write-Output '[Frontend] production build not found. Run npm run build first.'
+  } else {
+    Start-Process -FilePath 'cmd.exe' -ArgumentList '/c', 'npm run start' `
+      -WorkingDirectory $FE `
+      -RedirectStandardOutput (Join-Path $FE 'fe.out') `
+      -RedirectStandardError (Join-Path $FE 'fe.err') `
+      -WindowStyle Hidden
+
+    Write-Output "[Frontend] starting production server on :3000 (logs: $FE\fe.out / $FE\fe.err)"
+  }
 } else {
   Write-Output ('[Frontend] already running on :3000 (pid ' + $feconn[0].OwningProcess + ')')
 }
